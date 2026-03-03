@@ -6,13 +6,13 @@
   <title>04 - Horizonによるガバナンス</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
-    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
-    .header h1{font-size:2rem;background:linear-gradient(90deg,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
-    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
-    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
-    .section h2{font-size:1.3rem;color:#fbbf24;margin-bottom:.5rem}
-    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(251,191,36,.15)}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#f8fafc,#fffbeb);color:#334155;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.85);border-radius:20px;border:1px solid rgba(0,0,0,.06)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#f59e0b,#ea580c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#64748b;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.7);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#d97706;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(245,158,11,.15)}
     .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
     .mermaid svg{max-width:100%;height:auto}
   </style>
@@ -35,7 +35,7 @@ flowchart LR
     E["✅ <b>品質チェック</b><br/>データの正しさを<br/>自動監視"]
     F["🛡️ <b>セキュリティ</b><br/>トラストセンターで<br/>リスクをスキャン"]
     A --> B --> C --> D --> E --> F
-    classDef s fill:#1e3a5f,stroke:#fbbf24,color:#e2e8f0,font-size:14px
+    classDef s fill:#fef3c7,stroke:#fcd34d,color:#92400e,font-size:14px
     class A,B,C,D,E,F s
     </div>
   </div>
@@ -50,8 +50,8 @@ flowchart LR
     C["自分のユーザーに<br/>ロールを付与"]
     D["顧客テーブルを確認<br/>→ 名前・メール・電話<br/>など個人情報が丸見え！"]
     A --> B --> C --> D
-    classDef n fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef alert fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef n fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef alert fill:#fef3c7,stroke:#fcd34d,color:#92400e
     class A,B,C n
     class D alert
     </div>
@@ -67,8 +67,8 @@ flowchart LR
     C["SYSTEM$CLASSIFY実行<br/>customer_loyalty<br/>テーブルを自動分類"]
     D["✅ 結果を確認<br/>名前→PII, メール→PII<br/>電話→PII ... 自動付与"]
     A --> B --> C --> D
-    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef ok fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A,B,C s
     class D ok
     </div>
@@ -87,10 +87,10 @@ flowchart TD
     A --> B --> C
     C --> D
     C --> E
-    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef dec fill:#1e2d4a,stroke:#818cf8,color:#e2e8f0
-    classDef masked fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
-    classDef visible fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef dec fill:#ede9fe,stroke:#a5b4fc,color:#3730a3
+    classDef masked fill:#fee2e2,stroke:#fca5a5,color:#991b1b
+    classDef visible fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A,B s
     class C dec
     class D masked
@@ -108,8 +108,8 @@ flowchart LR
     C["ポリシーを<br/>テーブルに適用"]
     D["tb_data_engineer で<br/>SELECT → 米国の<br/>顧客だけが表示される"]
     A --> B --> C --> D
-    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef result fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef result fill:#fef3c7,stroke:#fcd34d,color:#92400e
     class A,B,C s
     class D result
     </div>
@@ -125,8 +125,8 @@ flowchart LR
     C["不正データをINSERT<br/>（意図的に合計を誤る）"]
     D["DMFが不正を検出<br/>→ テーブルに割り当て<br/>変更時に自動チェック"]
     A --> B --> C --> D
-    classDef s fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
-    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
+    classDef s fill:#cffafe,stroke:#67e8f9,color:#155e75
+    classDef err fill:#fee2e2,stroke:#fca5a5,color:#991b1b
     class A,B s
     class C err
     class D s
@@ -143,15 +143,15 @@ flowchart LR
     C["自動スキャン実行<br/>MFA未設定/過剰権限<br/>/非アクティブユーザー等"]
     D["📋 違反一覧を確認<br/>重大度別に表示<br/>修復方法も提示"]
     A --> B --> C --> D
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
     class A,B,C,D s
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
-      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#fbbf24',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+    mermaid.initialize({startOnLoad:true,theme:'base',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:false,background:'#ffffff',primaryColor:'#fef3c7',primaryTextColor:'#334155',primaryBorderColor:'#fcd34d',lineColor:'#94a3b8',secondaryColor:'#f1f5f9',tertiaryColor:'#f8fafc',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
   </script>
 </body>
 </html>

@@ -6,13 +6,13 @@
   <title>03 - Snowflake Cortex AI</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
-    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
-    .header h1{font-size:2rem;background:linear-gradient(90deg,#f472b6,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
-    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
-    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
-    .section h2{font-size:1.3rem;color:#c084fc;margin-bottom:.5rem}
-    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(192,132,252,.15)}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#f8fafc,#faf5ff);color:#334155;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.85);border-radius:20px;border:1px solid rgba(0,0,0,.06)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#64748b;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.7);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#7c3aed;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(139,92,246,.15)}
     .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
     .mermaid svg{max-width:100%;height:auto}
   </style>
@@ -33,7 +33,7 @@ flowchart LR
     C["🔍<br/><b>具体的に読み取る</b><br/>苦情や賞賛の<br/>ポイントを抽出"]
     D["📝<br/><b>ブランド別にまとめる</b><br/>要約を自動生成<br/>日本語にも翻訳"]
     A --> B --> C --> D
-    classDef s fill:#1e3a5f,stroke:#c084fc,color:#e2e8f0,font-size:14px
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8,font-size:14px
     class A,B,C,D s
     </div>
   </div>
@@ -52,8 +52,8 @@ flowchart LR
     INPUT --> CL
     INPUT --> EX
     INPUT --> SM
-    classDef input fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef ai fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef input fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef ai fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
     class INPUT input
     class S,CL,EX,SM ai
     </div>
@@ -68,7 +68,7 @@ flowchart LR
     B["各レビューに<br/>-1〜+1のスコアが付く"]
     C["ブランド別に集計<br/>ポジティブ/ニュートラル<br/>/ネガティブの<br/>平均スコアを比較"]
     A --> B --> C
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
     class A,B,C s
     </div>
   </div>
@@ -82,8 +82,8 @@ flowchart LR
     B["🍔 Food Quality<br/>💰 Pricing<br/>🤝 Service Experience<br/>👤 Staff Behavior"]
     C["ブランド × カテゴリで<br/>件数を集計<br/>→ 食品の品質が<br/>最も多い話題と判明"]
     A --> B --> C
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
-    classDef cat fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
+    classDef cat fill:#fef3c7,stroke:#fcd34d,color:#92400e
     class A,C s
     class B cat
     </div>
@@ -98,8 +98,8 @@ flowchart LR
     B["ブランド名・都市名<br/>レビュープレビュー<br/>と一緒に結果を表示"]
     C["💡 具体的な回答:<br/>'ホットドッグは完璧'<br/>'スタッフが救いだった'<br/>等をピンポイントで抽出"]
     A --> B --> C
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
-    classDef out fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
+    classDef out fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A,B s
     class C out
     </div>
@@ -115,8 +115,8 @@ flowchart LR
     C["AI_TRANSLATE で<br/>日本語に翻訳"]
     D["📝 ブランドごとの<br/>要約レポート完成<br/>（英語＋日本語）"]
     A --> B --> C --> D
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
-    classDef out fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
+    classDef out fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A,B,C s
     class D out
     </div>
@@ -124,8 +124,8 @@ flowchart LR
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
-      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#c084fc',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+    mermaid.initialize({startOnLoad:true,theme:'base',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:false,background:'#ffffff',primaryColor:'#f3e8ff',primaryTextColor:'#334155',primaryBorderColor:'#c4b5fd',lineColor:'#94a3b8',secondaryColor:'#f1f5f9',tertiaryColor:'#f8fafc',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
   </script>
 </body>
 </html>

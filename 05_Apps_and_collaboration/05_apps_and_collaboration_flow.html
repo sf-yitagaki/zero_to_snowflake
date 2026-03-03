@@ -6,13 +6,13 @@
   <title>05 - アプリとコラボレーション</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
-    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
-    .header h1{font-size:2rem;background:linear-gradient(90deg,#22d3ee,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
-    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
-    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
-    .section h2{font-size:1.3rem;color:#22d3ee;margin-bottom:.5rem}
-    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(34,211,238,.15)}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#f8fafc,#ecfeff);color:#334155;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.85);border-radius:20px;border:1px solid rgba(0,0,0,.06)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#06b6d4,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#64748b;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.7);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#0891b2;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(6,182,212,.15)}
     .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
     .mermaid svg{max-width:100%;height:auto}
   </style>
@@ -33,7 +33,7 @@ flowchart LR
     C["📊 <b>天気×売上分析</b><br/>気温・降水量・風速が<br/>売上に与える影響を分析"]
     D["📍 <b>POIデータ活用</b><br/>Safegraphの場所情報で<br/>高リスク拠点を特定"]
     A --> B --> C --> D
-    classDef s fill:#1e3a5f,stroke:#22d3ee,color:#e2e8f0,font-size:14px
+    classDef s fill:#cffafe,stroke:#67e8f9,color:#155e75,font-size:14px
     class A,B,C,D s
     </div>
   </div>
@@ -48,9 +48,9 @@ flowchart LR
     C["✅ 天気データが<br/>自分のアカウントに出現<br/>すぐにSELECTできる"]
     D["都市別の平均気温<br/>風速・降水量・降雪量<br/>を直接クエリ"]
     A --> B --> C --> D
-    classDef mp fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
-    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
-    classDef q fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef mp fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef ok fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    classDef q fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
     class A,B mp
     class C ok
     class D q
@@ -75,9 +75,9 @@ flowchart LR
     L --> V1
     V1 --> V2
     O --> V2
-    classDef ext fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
-    classDef int fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef view fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef ext fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef int fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef view fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class W ext
     class O,L int
     class V1,V2 view
@@ -91,8 +91,8 @@ flowchart LR
 flowchart LR
     A["📈 ハンブルクの<br/>2022年2月の<br/>日次平均気温<br/>→ 折れ線グラフ"]
     B["🌧️ シアトルで<br/>降水量 1インチ以上<br/>の日のメニュー別売上<br/>→ 棒グラフ"]
-    classDef q1 fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
-    classDef q2 fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef q1 fill:#cffafe,stroke:#67e8f9,color:#155e75
+    classDef q2 fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
     class A q1
     class B q2
     </div>
@@ -109,9 +109,9 @@ flowchart TD
     D["TOP3拠点で<br/>穏やかな日（≤20mph）vs<br/>風の強い日（>20mph）の<br/>ブランド別売上を比較"]
     E["💡 天候に強いブランドと<br/>弱いブランドを特定<br/>→ プロモーション施策や<br/>在庫調整に活用"]
     A --> B --> C --> D --> E
-    classDef mp fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
-    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef insight fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef mp fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef insight fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A mp
     class B,C,D s
     class E insight
@@ -120,8 +120,8 @@ flowchart TD
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
-      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#22d3ee',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+    mermaid.initialize({startOnLoad:true,theme:'base',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:false,background:'#ffffff',primaryColor:'#cffafe',primaryTextColor:'#334155',primaryBorderColor:'#67e8f9',lineColor:'#94a3b8',secondaryColor:'#f1f5f9',tertiaryColor:'#f8fafc',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
   </script>
 </body>
 </html>

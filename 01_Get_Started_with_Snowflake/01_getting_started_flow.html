@@ -6,13 +6,13 @@
   <title>01 - Snowflakeを始める</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
-    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
-    .header h1{font-size:2rem;background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
-    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
-    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
-    .section h2{font-size:1.3rem;color:#38bdf8;margin-bottom:.5rem}
-    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(56,189,248,.15)}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#f8fafc,#eef2ff);color:#334155;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.85);border-radius:20px;border:1px solid rgba(0,0,0,.06)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#0ea5e9,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#64748b;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.7);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#0284c7;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(14,165,233,.15)}
     .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
     .mermaid svg{max-width:100%;height:auto}
   </style>
@@ -35,7 +35,7 @@ flowchart LR
     E["💰 <b>コストを管理</b><br/>使いすぎ防止の<br/>仕組みを設定"]
     F["🔍 <b>データを探す</b><br/>ユニバーサル検索<br/>で素早く発見"]
     A --> B --> C --> D --> E --> F
-    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0,font-size:14px
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f,font-size:14px
     class A,B,C,D,E,F s
     </div>
   </div>
@@ -53,10 +53,10 @@ flowchart TD
     F["✅ 同じクエリが成功！<br/>トラック一覧が見えた"]
     G["サイズを XLarge に変更<br/>大きなクエリに対応"]
     A --> B --> C --> D --> E --> F --> G
-    classDef n fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
-    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
-    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
-    classDef up fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
+    classDef n fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef err fill:#fee2e2,stroke:#fca5a5,color:#991b1b
+    classDef ok fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    classDef up fill:#fef3c7,stroke:#fcd34d,color:#92400e
     class A,B,C,E n
     class D err
     class F ok
@@ -75,7 +75,7 @@ flowchart LR
     D["条件を少し変えて実行<br/><b>→ ウェアハウスキャッシュ</b><br/>SSDデータを再利用"]
     E["WH を XSmall に戻す"]
     A --> B --> C --> D --> E
-    classDef c fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
+    classDef c fill:#cffafe,stroke:#67e8f9,color:#155e75
     class A,B,C,D,E c
     </div>
   </div>
@@ -91,7 +91,7 @@ flowchart LR
     D["Ford_ → Ford に修正<br/>データクレンジング"]
     E["本番テーブルと入れ替え<br/>加工済みが本番に昇格"]
     A --> B --> C --> D --> E
-    classDef s fill:#1e2d4a,stroke:#818cf8,color:#e2e8f0
+    classDef s fill:#ede9fe,stroke:#a5b4fc,color:#3730a3
     class A,B,C,D,E s
     </div>
   </div>
@@ -105,9 +105,9 @@ flowchart LR
     B["UNDROP TABLE で<br/>削除を取り消す"]
     C["✅ テーブル復活！<br/>データも完全に元通り"]
     A --> B --> C
-    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
-    classDef fix fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
-    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef err fill:#fee2e2,stroke:#fca5a5,color:#991b1b
+    classDef fix fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef ok fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class A err
     class B fix
     class C ok
@@ -129,8 +129,8 @@ flowchart LR
         B2["UIでリソースを追加し<br/>支出制限とメール通知<br/>を設定"]
         B1 --> B2
     end
-    classDef rm fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
-    classDef bg fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef rm fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef bg fill:#d1fae5,stroke:#6ee7b7,color:#065f46
     class R1,R2 rm
     class B1,B2 bg
     </div>
@@ -148,15 +148,15 @@ flowchart LR
     A --> B
     A --> C
     A --> D
-    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef s fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
     class A,B,C,D s
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
-      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#38bdf8',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+    mermaid.initialize({startOnLoad:true,theme:'base',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:false,background:'#ffffff',primaryColor:'#e0f2fe',primaryTextColor:'#334155',primaryBorderColor:'#7dd3fc',lineColor:'#94a3b8',secondaryColor:'#f1f5f9',tertiaryColor:'#f8fafc',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
   </script>
 </body>
 </html>
