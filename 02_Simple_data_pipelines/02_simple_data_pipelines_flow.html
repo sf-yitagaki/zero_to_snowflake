@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>02 - シンプルなデータパイプライン</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#34d399,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#34d399;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(52,211,153,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>02 シンプルなデータパイプライン</h1>
+    <p>S3上のメニューCSVデータを取り込み、自動更新されるDynamic Tableパイプラインを構築します</p>
+  </div>
+
+  <div class="section">
+    <h2>ハンズオンの全体ストーリー</h2>
+    <p class="sub">メニューデータの取り込み → JSON解析 → 成分マスター自動更新 → トラック別使用量の自動集計</p>
+    <div class="mermaid">
+flowchart LR
+    A["☁️ <b>S3から取り込み</b><br/>CSVをSnowflakeに<br/>ロード"]
+    B["📦 <b>JSON解析</b><br/>メニューのJSON列から<br/>成分情報を取り出す"]
+    C["🔄 <b>Dynamic Table</b><br/>自動更新される<br/>成分マスターを作成"]
+    D["🔗 <b>パイプライン構築</b><br/>Dynamic Tableを連鎖<br/>させて自動化"]
+    E["📊 <b>DAGで確認</b><br/>UIでパイプラインの<br/>全体像を見る"]
+    A --> B --> C --> D --> E
+    classDef s fill:#1e3a5f,stroke:#34d399,color:#e2e8f0,font-size:14px
+    class A,B,C,D,E s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : S3のCSVをSnowflakeに取り込む</h2>
+    <p class="sub">S3バケットを参照するステージを作り、メニューデータをCOPY INTOでテーブルにロード</p>
+    <div class="mermaid">
+flowchart LR
+    A["☁️ S3バケット上の<br/>メニューCSVファイル"]
+    B["ステージを作成<br/>S3の場所とCSV形式<br/>を指定"]
+    C["受け入れ先テーブル作成<br/>menu_staging<br/>（VARIANT列含む）"]
+    D["COPY INTO で<br/>データをロード"]
+    E["✅ SELECT で確認<br/>メニューデータが<br/>テーブルに入った"]
+    A --> B --> C --> D --> E
+    classDef s3 fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef sf fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A s3
+    class B,C,D sf
+    class E ok
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : メニューのJSONデータから成分情報を取り出す</h2>
+    <p class="sub">VARIANT列に格納されたJSON（健康指標・成分リスト）を、SQLで構造化データとして扱う方法を学ぶ</p>
+    <div class="mermaid">
+flowchart LR
+    A["VARIANT列を確認<br/>JSONがまるごと<br/>1列に入っている"]
+    B["コロン : でキーにアクセス<br/>角括弧 [] で配列を選択<br/>:: で型変換"]
+    C["メニュー名・ID・<br/>成分リストを<br/>取り出せた"]
+    D["FLATTENで<br/>成分配列を<br/>1行ずつに展開"]
+    A --> B --> C
+    A --> D
+    classDef s fill:#1e2d4a,stroke:#818cf8,color:#e2e8f0
+    class A,B,C,D s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : Dynamic Tableで自動更新される成分マスターを作成</h2>
+    <p class="sub">Dynamic Tableは「SQLで定義するだけ」で、元データが変わると最大1分で自動反映されるテーブル</p>
+    <div class="mermaid">
+flowchart TD
+    A["成分Dynamic Tableを作成<br/>メニューから全成分を抽出"]
+    B["✅ SELECT で確認<br/>成分マスターができた"]
+    C["新メニュー追加テスト<br/>バインミーサンドイッチを<br/>menu_staging にINSERT"]
+    D["⏳ 最大1分待つ"]
+    E["✅ 新しい成分が<br/>自動的に追加された！<br/>French Baguette,<br/>Pickled Daikon"]
+    A --> B
+    C --> D --> E
+    classDef dt fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef test fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef wait fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class A,B,E dt
+    class C test
+    class D wait
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4 : 3つのDynamic Tableを連鎖させてパイプラインを構築</h2>
+    <p class="sub">注文データも組み合わせて「トラック別の月間成分使用量」まで自動計算するパイプラインを作る</p>
+    <div class="mermaid">
+flowchart LR
+    subgraph RAW["元データ"]
+        S1["メニュー<br/>menu_staging"]
+        S2["注文ヘッダー"]
+        S3["注文明細"]
+    end
+    subgraph AUTO["自動更新パイプライン"]
+        DT1["🔄 成分マスター<br/>全成分の一覧"]
+        DT2["🔄 成分→メニュー対応<br/>どの成分がどの<br/>メニューに使われるか"]
+        DT3["🔄 トラック別成分使用量<br/>月ごとの使用量を集計<br/>在庫管理に活用"]
+    end
+    S1 --> DT1
+    S1 --> DT2
+    DT1 --> DT2
+    S2 --> DT3
+    S3 --> DT3
+    DT2 --> DT3
+    classDef raw fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef dt fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class S1,S2,S3 raw
+    class DT1,DT2,DT3 dt
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 5 : Snowsight UIでパイプライン全体像を確認</h2>
+    <p class="sub">カタログ → TB_101 → HARMONIZED → ダイナミックテーブル → グラフタブで依存関係を視覚的に確認</p>
+    <div class="mermaid">
+flowchart LR
+    A["カタログを開く"]
+    B["HARMONIZED ><br/>ダイナミックテーブル ><br/>INGREDIENT を選択"]
+    C["📊 グラフタブで<br/>パイプライン全体の<br/>依存関係・LAG設定・<br/>更新状態を一覧"]
+    A --> B --> C
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class A,B,C s
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#34d399',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>

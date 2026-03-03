@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>01 - Snowflakeを始める</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#38bdf8;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(56,189,248,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>01 Snowflakeを始める</h1>
+    <p>TastyBytesフードトラックのデータを使って、Snowflakeの基本操作を体験します</p>
+  </div>
+
+  <div class="section">
+    <h2>ハンズオンの全体ストーリー</h2>
+    <p class="sub">フードトラックの売上データを分析するために、環境構築からコスト管理までを一通り体験</p>
+    <div class="mermaid">
+flowchart LR
+    A["🖥️ <b>エンジンを作る</b><br/>クエリ実行用の<br/>ウェアハウスを作成"]
+    B["⚡ <b>速さを体感する</b><br/>3種のキャッシュで<br/>クエリが高速化"]
+    C["🔧 <b>データを整備する</b><br/>トラック情報の<br/>加工とクレンジング"]
+    D["🛡️ <b>消しても戻せる</b><br/>誤削除からの<br/>復旧を体験"]
+    E["💰 <b>コストを管理</b><br/>使いすぎ防止の<br/>仕組みを設定"]
+    F["🔍 <b>データを探す</b><br/>ユニバーサル検索<br/>で素早く発見"]
+    A --> B --> C --> D --> E --> F
+    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0,font-size:14px
+    class A,B,C,D,E,F s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : ウェアハウスを作ってクエリを実行する</h2>
+    <p class="sub">ウェアハウスはクエリを動かすエンジン。作成→起動→サイズ変更の一連の操作を体験します</p>
+    <div class="mermaid">
+flowchart TD
+    A["既存のウェアハウスを確認<br/>SHOW WAREHOUSES"]
+    B["自分のウェアハウスを作成<br/>サイズ XSmall で作る"]
+    C["トラックテーブルを<br/>クエリしてみる"]
+    D["❌ 停止中なのでエラー"]
+    E["ウェアハウスを起動して<br/>自動再開もONにする"]
+    F["✅ 同じクエリが成功！<br/>トラック一覧が見えた"]
+    G["サイズを XLarge に変更<br/>大きなクエリに対応"]
+    A --> B --> C --> D --> E --> F --> G
+    classDef n fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
+    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef up fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
+    class A,B,C,E n
+    class D err
+    class F ok
+    class G up
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : 同じクエリが一瞬で返ってくる — キャッシュの体験</h2>
+    <p class="sub">トラックごとの売上集計クエリを3回実行し、毎回速くなることを体感します</p>
+    <div class="mermaid">
+flowchart LR
+    A["統計クエリを実行<br/>COUNT, MAX, MIN<br/><b>→ メタデータキャッシュ</b><br/>WH不要で即回答"]
+    B["トラック別売上を集計<br/>初回は数秒かかる"]
+    C["同じクエリをもう一度<br/><b>→ リザルトキャッシュ</b><br/>数百msで完了！"]
+    D["条件を少し変えて実行<br/><b>→ ウェアハウスキャッシュ</b><br/>SSDデータを再利用"]
+    E["WH を XSmall に戻す"]
+    A --> B --> C --> D --> E
+    classDef c fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
+    class A,B,C,D,E c
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : トラックデータの加工 — ゼロコピークローン</h2>
+    <p class="sub">本番テーブルを壊さないよう、瞬時にコピーを作って加工し、完成したら本番と入れ替えます</p>
+    <div class="mermaid">
+flowchart LR
+    A["本番テーブルを<br/>瞬時にコピー<br/>（追加容量ゼロ）"]
+    B["コピーに year, make,<br/>model 列を追加"]
+    C["JSON列から値を抽出し<br/>新しい列に格納"]
+    D["Ford_ → Ford に修正<br/>データクレンジング"]
+    E["本番テーブルと入れ替え<br/>加工済みが本番に昇格"]
+    A --> B --> C --> D --> E
+    classDef s fill:#1e2d4a,stroke:#818cf8,color:#e2e8f0
+    class A,B,C,D,E s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4 : 間違えてDROPしても大丈夫 — UNDROP</h2>
+    <p class="sub">本番テーブルを誤って削除→UNDROPで即座に復活させるTime Travel機能を体験</p>
+    <div class="mermaid">
+flowchart LR
+    A["😱 本番テーブルを<br/>間違えてDROP！"]
+    B["UNDROP TABLE で<br/>削除を取り消す"]
+    C["✅ テーブル復活！<br/>データも完全に元通り"]
+    A --> B --> C
+    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
+    classDef fix fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
+    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A err
+    class B fix
+    class C ok
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 5-6 : コスト管理</h2>
+    <p class="sub">クレジット使いすぎを防ぐリソースモニターと、あらゆるコストを追跡する予算を設定</p>
+    <div class="mermaid">
+flowchart LR
+    subgraph RM["リソースモニター"]
+        R1["月100クレジットの<br/>上限を設定"]
+        R2["75%で通知<br/>90%で停止<br/>100%で即時停止"]
+        R1 --> R2
+    end
+    subgraph BG["予算"]
+        B1["予算オブジェクトを作成"]
+        B2["UIでリソースを追加し<br/>支出制限とメール通知<br/>を設定"]
+        B1 --> B2
+    end
+    classDef rm fill:#2d2b1e,stroke:#fbbf24,color:#fde68a
+    classDef bg fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class R1,R2 rm
+    class B1,B2 bg
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 7 : ユニバーサル検索でデータを発見</h2>
+    <p class="sub">検索バーに「truck」と入力するだけで、テーブル・ビュー・Marketplace・ドキュメントを横断検索</p>
+    <div class="mermaid">
+flowchart LR
+    A["🔍 検索バーに<br/>truck と入力"]
+    B["テーブル・ビュー・<br/>ステージが一覧表示"]
+    C["Marketplaceの<br/>データ製品も表示"]
+    D["自然言語でも検索OK<br/>'最もリピート客が<br/>多いトラックは？'"]
+    A --> B
+    A --> C
+    A --> D
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class A,B,C,D s
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#38bdf8',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>

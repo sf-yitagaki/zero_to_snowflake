@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>04 - Horizonによるガバナンス</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#fbbf24;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(251,191,36,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>04 Horizonによるガバナンス</h1>
+    <p>顧客ロイヤルティテーブルの個人情報（PII）を、ロールに応じて自動的に保護します</p>
+  </div>
+
+  <div class="section">
+    <h2>ハンズオンの全体ストーリー</h2>
+    <p class="sub">顧客データにPIIがある！→ 自動検出 → 自動マスク → 行レベル制限 → 品質チェック → セキュリティ監視</p>
+    <div class="mermaid">
+flowchart LR
+    A["👤 <b>ロールを作る</b><br/>データスチュワード<br/>ロールを新規作成"]
+    B["🏷️ <b>PIIを自動検出</b><br/>名前・電話・メール<br/>等を自動でタグ付け"]
+    C["🎭 <b>自動マスク</b><br/>権限のないロールには<br/>MASKED と表示"]
+    D["🚧 <b>行を制限</b><br/>ロールに応じて<br/>見える国を制限"]
+    E["✅ <b>品質チェック</b><br/>データの正しさを<br/>自動監視"]
+    F["🛡️ <b>セキュリティ</b><br/>トラストセンターで<br/>リスクをスキャン"]
+    A --> B --> C --> D --> E --> F
+    classDef s fill:#1e3a5f,stroke:#fbbf24,color:#e2e8f0,font-size:14px
+    class A,B,C,D,E,F s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : カスタムロールを作って権限を付与</h2>
+    <p class="sub">tb_data_steward ロールを作成し、WH使用権・DB/スキーマ参照権・テーブル読取権を付与。顧客データを見たらPIIだらけ！</p>
+    <div class="mermaid">
+flowchart LR
+    A["ロールを新規作成<br/>tb_data_steward"]
+    B["権限を付与<br/>WH使用/DB参照<br/>/テーブル読取り"]
+    C["自分のユーザーに<br/>ロールを付与"]
+    D["顧客テーブルを確認<br/>→ 名前・メール・電話<br/>など個人情報が丸見え！"]
+    A --> B --> C --> D
+    classDef n fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef alert fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    class A,B,C n
+    class D alert
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : 機密列を自動検出してPIIタグを付与</h2>
+    <p class="sub">分類プロファイルを作り SYSTEM$CLASSIFY を実行すると、名前・電話・メール等の列に自動でPIIタグが付く</p>
+    <div class="mermaid">
+flowchart LR
+    A["PIIタグと分類<br/>プロファイルを作成"]
+    B["タグマップを設定<br/>NAME, PHONE, EMAIL等<br/>→ PIIタグに紐付け"]
+    C["SYSTEM$CLASSIFY実行<br/>customer_loyalty<br/>テーブルを自動分類"]
+    D["✅ 結果を確認<br/>名前→PII, メール→PII<br/>電話→PII ... 自動付与"]
+    A --> B --> C --> D
+    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A,B,C s
+    class D ok
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : マスキングポリシーで列を自動保護</h2>
+    <p class="sub">PIIタグが付いた列に対して、管理者以外のロールでは値が隠されるマスキングポリシーを設定</p>
+    <div class="mermaid">
+flowchart TD
+    A["マスキングポリシーを作成<br/>文字列→MASKED<br/>日付→年だけ表示"]
+    B["ポリシーをPIIタグに<br/>紐付ける"]
+    C{"同じテーブルを<br/>2つのロールで確認"}
+    D["👤 public ロール<br/>名前: ****MASKED****<br/>メール: ****MASKED****<br/>誕生日: 1990-01-01"]
+    E["👑 tb_admin ロール<br/>名前: 山田太郎<br/>メール: taro@example.com<br/>誕生日: 1990-05-15"]
+    A --> B --> C
+    C --> D
+    C --> E
+    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef dec fill:#1e2d4a,stroke:#818cf8,color:#e2e8f0
+    classDef masked fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
+    classDef visible fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A,B s
+    class C dec
+    class D masked
+    class E visible
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4 : 行アクセスポリシーで見える行を制限</h2>
+    <p class="sub">ロールと国のマッピングテーブルを作り、tb_data_engineer には米国データだけが見えるようにする</p>
+    <div class="mermaid">
+flowchart LR
+    A["マッピングテーブル作成<br/>tb_data_engineer<br/>→ United States"]
+    B["行アクセスポリシー作成<br/>管理者は全行OK<br/>他はマップに基づく"]
+    C["ポリシーを<br/>テーブルに適用"]
+    D["tb_data_engineer で<br/>SELECT → 米国の<br/>顧客だけが表示される"]
+    A --> B --> C --> D
+    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef result fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    class A,B,C s
+    class D result
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 5 : データメトリック関数でデータ品質を監視</h2>
+    <p class="sub">組み込みDMF（NULL率・重複数・平均値）を試し、独自ルール（合計≠単価×数量を検出）も作成</p>
+    <div class="mermaid">
+flowchart LR
+    A["組み込みDMFを実行<br/>NULL率 / 重複数 / 平均値"]
+    B["カスタムDMFを作成<br/>合計 ≠ 単価×数量<br/>の件数を検出"]
+    C["不正データをINSERT<br/>（意図的に合計を誤る）"]
+    D["DMFが不正を検出<br/>→ テーブルに割り当て<br/>変更時に自動チェック"]
+    A --> B --> C --> D
+    classDef s fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
+    classDef err fill:#3b1f1f,stroke:#ef4444,color:#fca5a5
+    class A,B s
+    class C err
+    class D s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 6 : トラストセンターでアカウント全体のセキュリティを監視</h2>
+    <p class="sub">UIでスキャナーパッケージ（CIS Benchmarks / Threat Intelligence）を有効化し、違反一覧を確認</p>
+    <div class="mermaid">
+flowchart LR
+    A["トラストセンターを開く"]
+    B["CIS Benchmarks と<br/>Threat Intelligence を<br/>月次で有効化"]
+    C["自動スキャン実行<br/>MFA未設定/過剰権限<br/>/非アクティブユーザー等"]
+    D["📋 違反一覧を確認<br/>重大度別に表示<br/>修復方法も提示"]
+    A --> B --> C --> D
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class A,B,C,D s
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#fbbf24',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>

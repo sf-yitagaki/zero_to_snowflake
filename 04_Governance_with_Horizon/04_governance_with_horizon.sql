@@ -153,7 +153,7 @@ GRANT ROLE tb_data_steward TO USER IDENTIFIER($my_user);
 */
 USE ROLE tb_data_steward;
 
--- お祝いに、これから作業するデータのタイプを確認しましょう
+-- これから作業するデータのタイプを確認しましょう
 SELECT TOP 100 * FROM raw_customer.customer_loyalty;
 
 /*
@@ -212,10 +212,24 @@ CREATE OR REPLACE SNOWFLAKE.DATA_PRIVACY.CLASSIFICATION_PROFILE
       'auto_tag': true
     });
 
+-- チェック
+SHOW TAGS IN SCHEMA tb_101.governance;
+
 /*
     指定されたセマンティックカテゴリに基づいて列に自動的にタグ付けするタグマップを作成します。
     これは、semantic_categories配列内の値のいずれかで分類された列が、自動的にPIIタグでタグ付けされることを意味します。
+
+SYSTEM$CLASSIFY実行時に自動で付くもの：
+├── SEMANTIC_CATEGORY  ← Snowflake組み込み
+├── PRIVACY_CATEGORY   ← Snowflake組み込み（あなたは設定していない）
+        IDENTIFIER	個人を特定できる情報（名前、メールなど）
+        QUASI_IDENTIFIER	組み合わせると特定可能（年齢、郵便番号など）
+        SENSITIVE	機密情報（医療、金融データなど）
+└── governance.pii     ← SET_TAG_MAPで設定したカスタムタグ
 */
+
+-- SET_TAG_MAP
+-- → 「NAMEなどを見つけたらpiiタグを付けてね」と設定(この時点ではタグは付かない)
 CALL governance.tb_classification_profile!SET_TAG_MAP(
   {'column_tag_map':[
     {
@@ -225,6 +239,14 @@ CALL governance.tb_classification_profile!SET_TAG_MAP(
     }]});
 
 -- 次に、SYSTEM$CLASSIFYを呼び出して、分類プロファイルを使用してcustomer_loyaltyテーブルを自動的に分類します
+/***
+SYSTEM$CLASSIFY
+   → 実際にテーブルをスキャンして分類実行
+   → ここで3種類すべてのタグが付く：
+      ├── SEMANTIC_CATEGORY  ← 自動
+      ├── PRIVACY_CATEGORY   ← 自動
+      └── governance.pii     ← SET_TAG_MAPの設定に基づく
+***/
 CALL SYSTEM$CLASSIFY('tb_101.raw_customer.customer_loyalty', 'tb_101.governance.tb_classification_profile');
 
 /*
@@ -364,7 +386,7 @@ USE ROLE tb_data_engineer;
 SELECT TOP 100 * FROM raw_customer.customer_loyalty;
 
 /*
-    よくできました！Snowflakeの列および行レベルのセキュリティ戦略を使用してデータをガバナンスおよび
+    Snowflakeの列および行レベルのセキュリティ戦略を使用してデータをガバナンスおよび
     保護する方法についてより深く理解できたはずです。個人を特定できる情報を含む列を保護するために
     マスキングポリシーと組み合わせて使用するタグを作成する方法と、ロールが特定の列値のみに
     アクセスできるようにする行アクセスポリシーを学びました。
@@ -389,6 +411,9 @@ SELECT TOP 100 * FROM raw_customer.customer_loyalty;
 
 -- 次に、DMFの使用を開始するためにTastyBytesデータスチュワードロールに戻ります
 USE ROLE tb_data_steward;
+
+-- データの確認
+SELECT customer_id FROM raw_pos.order_header;
 
 -- これは、order headerテーブルからnullの顧客IDのパーセンテージを返します
 SELECT SNOWFLAKE.CORE.NULL_PERCENT(SELECT customer_id FROM raw_pos.order_header);

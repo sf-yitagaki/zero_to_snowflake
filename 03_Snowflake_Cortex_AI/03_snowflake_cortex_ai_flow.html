@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>03 - Snowflake Cortex AI</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#f472b6,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#c084fc;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(192,132,252,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>03 Snowflake Cortex AI</h1>
+    <p>フードトラックの顧客レビュー1万件を、SQLだけでAI分析します</p>
+  </div>
+
+  <div class="section">
+    <h2>ハンズオンの全体ストーリー</h2>
+    <p class="sub">顧客レビューに対して4つのAI関数を順番に適用し、ビジネスインサイトを導き出します</p>
+    <div class="mermaid">
+flowchart LR
+    A["😊😐😞<br/><b>感情を測る</b><br/>各レビューに<br/>スコアをつける"]
+    B["📂<br/><b>テーマで分ける</b><br/>食品/サービス/価格<br/>等に自動分類"]
+    C["🔍<br/><b>具体的に読み取る</b><br/>苦情や賞賛の<br/>ポイントを抽出"]
+    D["📝<br/><b>ブランド別にまとめる</b><br/>要約を自動生成<br/>日本語にも翻訳"]
+    A --> B --> C --> D
+    classDef s fill:#1e3a5f,stroke:#c084fc,color:#e2e8f0,font-size:14px
+    class A,B,C,D s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>入力データと4つの分析アウトプット</h2>
+    <p class="sub">同じレビューデータから、4つの異なる切り口で分析結果を生成</p>
+    <div class="mermaid">
+flowchart LR
+    INPUT["💬 英語の顧客レビュー<br/>1万件<br/>truck_reviews_v"]
+    S["😊 SENTIMENT<br/>ブランド別の<br/>ポジティブ/ネガティブ<br/>スコア分布"]
+    CL["📂 AI_CLASSIFY<br/>ブランド × テーマ別<br/>レビュー件数<br/>（Food/Service/等）"]
+    EX["🔍 EXTRACT_ANSWER<br/>ブランド・都市ごとの<br/>具体的な苦情や賞賛"]
+    SM["📝 AI_SUMMARIZE_AGG<br/>ブランドごとの<br/>レビュー要約<br/>（英語＋日本語）"]
+    INPUT --> S
+    INPUT --> CL
+    INPUT --> EX
+    INPUT --> SM
+    classDef input fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef ai fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class INPUT input
+    class S,CL,EX,SM ai
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : SENTIMENT — 各ブランドの顧客満足度を数値化</h2>
+    <p class="sub">「各トラックブランドに対して顧客はどう感じているか？」→ レビュー全件を自動スコアリング</p>
+    <div class="mermaid">
+flowchart LR
+    A["レビュー1万件を<br/>SENTIMENT関数に渡す"]
+    B["各レビューに<br/>-1〜+1のスコアが付く"]
+    C["ブランド別に集計<br/>ポジティブ/ニュートラル<br/>/ネガティブの<br/>平均スコアを比較"]
+    A --> B --> C
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    class A,B,C s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : AI_CLASSIFY — レビューをテーマ別に分類</h2>
+    <p class="sub">「顧客は主に何について話しているか？」→ AIが文脈を理解して4つのカテゴリに振り分け</p>
+    <div class="mermaid">
+flowchart LR
+    A["レビューと<br/>4つのカテゴリを<br/>AI_CLASSIFYに渡す"]
+    B["🍔 Food Quality<br/>💰 Pricing<br/>🤝 Service Experience<br/>👤 Staff Behavior"]
+    C["ブランド × カテゴリで<br/>件数を集計<br/>→ 食品の品質が<br/>最も多い話題と判明"]
+    A --> B --> C
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef cat fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    class A,C s
+    class B cat
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : EXTRACT_ANSWER — 具体的なフィードバックを抽出</h2>
+    <p class="sub">「このレビューで言及されている具体的な改善点や不満は？」→ 長文から要点だけを自動抽出</p>
+    <div class="mermaid">
+flowchart LR
+    A["各レビューと質問文を<br/>EXTRACT_ANSWERに渡す"]
+    B["ブランド名・都市名<br/>レビュープレビュー<br/>と一緒に結果を表示"]
+    C["💡 具体的な回答:<br/>'ホットドッグは完璧'<br/>'スタッフが救いだった'<br/>等をピンポイントで抽出"]
+    A --> B --> C
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef out fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A,B s
+    class C out
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4 : AI_SUMMARIZE_AGG — ブランドごとのサマリー生成</h2>
+    <p class="sub">「各ブランドの全体的な評判は？」→ 複数レビューを1つの要約に凝縮し、日本語にも翻訳</p>
+    <div class="mermaid">
+flowchart LR
+    A["ブランドごとに<br/>レビューをGROUP BY"]
+    B["AI_SUMMARIZE_AGG で<br/>英語のサマリーを生成"]
+    C["AI_TRANSLATE で<br/>日本語に翻訳"]
+    D["📝 ブランドごとの<br/>要約レポート完成<br/>（英語＋日本語）"]
+    A --> B --> C --> D
+    classDef s fill:#2d1e3a,stroke:#c084fc,color:#e2e8f0
+    classDef out fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A,B,C s
+    class D out
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#c084fc',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>

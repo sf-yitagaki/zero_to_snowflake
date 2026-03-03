@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>05 - アプリとコラボレーション</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.05);border-radius:20px;border:1px solid rgba(255,255,255,.1)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#22d3ee,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#94a3b8;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.03);border-radius:20px;border:1px solid rgba(255,255,255,.08);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#22d3ee;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(34,211,238,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>05 アプリとコラボレーション</h1>
+    <p>アナリストBenが天気データと売上データを組み合わせ、天候が売上に与える影響を分析します</p>
+  </div>
+
+  <div class="section">
+    <h2>ハンズオンの全体ストーリー</h2>
+    <p class="sub">Marketplaceで天気・POIデータを取得 → 自社の注文データと結合 → 天候×売上のインサイトを発見</p>
+    <div class="mermaid">
+flowchart LR
+    A["🛒 <b>天気データ取得</b><br/>Marketplaceから<br/>Weather Sourceを追加"]
+    B["🔗 <b>データ結合</b><br/>天気×注文×ロケーション<br/>の統合ビューを作成"]
+    C["📊 <b>天気×売上分析</b><br/>気温・降水量・風速が<br/>売上に与える影響を分析"]
+    D["📍 <b>POIデータ活用</b><br/>Safegraphの場所情報で<br/>高リスク拠点を特定"]
+    A --> B --> C --> D
+    classDef s fill:#1e3a5f,stroke:#22d3ee,color:#e2e8f0,font-size:14px
+    class A,B,C,D s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : Marketplaceから天気データを取得</h2>
+    <p class="sub">Marketplaceで「Weather Source frostbyte」を検索→取得ボタンを押すだけ。データのコピーは不要で、常に最新</p>
+    <div class="mermaid">
+flowchart LR
+    A["Marketplaceを開き<br/>Weather Source frostbyte<br/>を検索"]
+    B["取得ボタンを押す<br/>DB名: ZTS_WEATHERSOURCE"]
+    C["✅ 天気データが<br/>自分のアカウントに出現<br/>すぐにSELECTできる"]
+    D["都市別の平均気温<br/>風速・降水量・降雪量<br/>を直接クエリ"]
+    A --> B --> C --> D
+    classDef mp fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef ok fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    classDef q fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    class A,B mp
+    class C ok
+    class D q
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : 天気データと自社データを結合するビューを作成</h2>
+    <p class="sub">天気×ロケーション×国を結合した日次天気ビュー、さらに注文データも結合した天気別売上ビューを作成</p>
+    <div class="mermaid">
+flowchart LR
+    subgraph EXT["Marketplace（外部データ）"]
+        W["☁️ 天気データ<br/>気温/降水量/風速"]
+    end
+    subgraph INT["TastyBytes（自社データ）"]
+        O["注文データ<br/>売上/メニュー/日時"]
+        L["ロケーション<br/>都市/国"]
+    end
+    V1["🔗 日次天気ビュー<br/>天気×ロケーション<br/>×国を結合"]
+    V2["🔗 天気別売上ビュー<br/>天気×注文データ<br/>を統合"]
+    W --> V1
+    L --> V1
+    V1 --> V2
+    O --> V2
+    classDef ext fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef int fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef view fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class W ext
+    class O,L int
+    class V1,V2 view
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 続き : ビューを使った分析クエリ</h2>
+    <p class="sub">ハンブルクの気温トレンドを折れ線グラフで、シアトルの大雨の日の売上を棒グラフで可視化</p>
+    <div class="mermaid">
+flowchart LR
+    A["📈 ハンブルクの<br/>2022年2月の<br/>日次平均気温<br/>→ 折れ線グラフ"]
+    B["🌧️ シアトルで<br/>降水量 1インチ以上<br/>の日のメニュー別売上<br/>→ 棒グラフ"]
+    classDef q1 fill:#1a3350,stroke:#22d3ee,color:#e2e8f0
+    classDef q2 fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    class A q1
+    class B q2
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : Safegraph POIデータで風の強い拠点を分析</h2>
+    <p class="sub">MarketplaceからPOIデータも取得し、最も風の強い3拠点で「穏やかな日 vs 風の強い日」の売上を比較</p>
+    <div class="mermaid">
+flowchart TD
+    A["Marketplaceから<br/>Safegraph POIデータを取得<br/>DB名: ZTS_SAFEGRAPH"]
+    B["POIビューを作成<br/>自社ロケーション×<br/>POI情報を結合"]
+    C["2022年の米国で<br/>平均風速TOP3の<br/>拠点を特定"]
+    D["TOP3拠点で<br/>穏やかな日（≤20mph）vs<br/>風の強い日（>20mph）の<br/>ブランド別売上を比較"]
+    E["💡 天候に強いブランドと<br/>弱いブランドを特定<br/>→ プロモーション施策や<br/>在庫調整に活用"]
+    A --> B --> C --> D --> E
+    classDef mp fill:#3b2d1e,stroke:#fbbf24,color:#fde68a
+    classDef s fill:#1e3a5f,stroke:#38bdf8,color:#e2e8f0
+    classDef insight fill:#1a3a2a,stroke:#34d399,color:#a7f3d0
+    class A mp
+    class B,C,D s
+    class E insight
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:true,background:'#0f172a',primaryColor:'#1e3a5f',primaryTextColor:'#e2e8f0',primaryBorderColor:'#22d3ee',lineColor:'#475569',secondaryColor:'#1e293b',tertiaryColor:'#0f172a',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>
