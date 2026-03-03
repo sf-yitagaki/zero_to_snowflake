@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DB Setup - ハンズオン環境構築の流れ</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;background:linear-gradient(135deg,#f8fafc,#eef2ff);color:#334155;min-height:100vh;padding:2rem}
+    .header{text-align:center;margin-bottom:2.5rem;padding:2.5rem 2rem;background:rgba(255,255,255,.85);border-radius:20px;border:1px solid rgba(0,0,0,.06)}
+    .header h1{font-size:2rem;background:linear-gradient(90deg,#0ea5e9,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.75rem}
+    .header p{color:#64748b;font-size:1.05rem;line-height:1.6}
+    .section{background:rgba(255,255,255,.7);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:2.5rem;margin-bottom:2.5rem}
+    .section h2{font-size:1.3rem;color:#0284c7;margin-bottom:.5rem}
+    .section .sub{color:#64748b;font-size:.95rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(14,165,233,.15)}
+    .mermaid{display:flex;justify-content:center;overflow-x:auto;padding:1rem 0}
+    .mermaid svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>DB Setup — ハンズオン環境の構築</h1>
+    <p>TastyBytesフードトラックのハンズオンに必要なデータベース・テーブル・データを<br/>すべて自動で準備するセットアップスクリプトです</p>
+  </div>
+
+  <div class="section">
+    <h2>全体の流れ</h2>
+    <p class="sub">6つのステップで、ハンズオンに必要な環境をゼロから構築します</p>
+    <div class="mermaid">
+flowchart LR
+    A["🏗️ <b>器を作る</b><br/>データベースと<br/>スキーマを用意"]
+    B["👥 <b>役割を決める</b><br/>誰が何をできるか<br/>ロールと権限を設定"]
+    C["📋 <b>テーブルを作る</b><br/>データを入れる箱を<br/>9個作成"]
+    D["🔗 <b>ビューで繋ぐ</b><br/>バラバラのデータを<br/>結合して見やすく"]
+    E["📦 <b>データを投入</b><br/>S3からCSVデータを<br/>一括ロード"]
+    F["✨ <b>仕上げ</b><br/>データ加工とAI検索<br/>の準備を完了"]
+    A --> B --> C --> D --> E --> F
+    classDef s fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f,font-size:14px
+    class A,B,C,D,E,F s
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 1 : 器を作る — データベース・スキーマ・ウェアハウス</h2>
+    <p class="sub">TastyBytesのデータを整理するための「棚」と、クエリを動かすための「エンジン」を用意します</p>
+    <div class="mermaid">
+flowchart TD
+    DB["🗄️ <b>データベース tb_101</b><br/>全データの大元の入れ物"]
+    DB --> S1["raw_pos<br/>売上・トラック等<br/>の生データ"]
+    DB --> S2["raw_customer<br/>顧客ロイヤルティ<br/>の生データ"]
+    DB --> S3["raw_support<br/>トラックレビュー<br/>の生データ"]
+    DB --> S4["harmonized<br/>生データを結合した<br/>統合ビュー"]
+    DB --> S5["analytics<br/>分析しやすく<br/>整えたビュー"]
+    DB --> S6["governance<br/>データ保護の<br/>ルール置き場"]
+    DB --> S7["semantic_layer<br/>AI分析用の<br/>整理済みビュー"]
+    WH["⚙️ <b>ウェアハウス（エンジン）</b>"]
+    WH --> W1["tb_de_wh<br/>データ投入用<br/>（Large）"]
+    WH --> W2["tb_dev_wh<br/>開発用<br/>（XSmall）"]
+    WH --> W3["tb_analyst_wh<br/>アナリスト用<br/>（Large）"]
+    WH --> W4["tb_cortex_wh<br/>AI分析用<br/>（Large）"]
+    classDef db fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef sc fill:#ede9fe,stroke:#a5b4fc,color:#3730a3
+    classDef wh fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef we fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    class DB db
+    class S1,S2,S3,S4,S5,S6,S7 sc
+    class WH,W1,W2,W3,W4 wh
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2 : 役割を決める — ロール階層と権限</h2>
+    <p class="sub">「誰がどのデータを操作できるか」を制御する4つのロールを作り、階層でつなぎます</p>
+    <div class="mermaid">
+flowchart TD
+    SYS["sysadmin<br/>（システム全体の管理者）"]
+    ADM["🔑 tb_admin<br/>TastyBytesの管理者<br/>WH作成・ポリシー適用"]
+    DE["🛠️ tb_data_engineer<br/>データエンジニア<br/>テーブル・ビューの操作"]
+    DEV["💻 tb_dev<br/>開発者<br/>アプリ・AI検索の構築"]
+    ANA["📊 tb_analyst<br/>アナリスト<br/>データ分析・参照"]
+    SYS --> ADM --> DE
+    DE --> DEV
+    DE --> ANA
+    classDef top fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
+    classDef mid fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef low fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    class SYS top
+    class ADM mid
+    class DE mid
+    class DEV,ANA low
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3 : テーブルを作る — 9つのデータの箱を準備</h2>
+    <p class="sub">フードトラックビジネスに必要な情報を格納するテーブルを作成します</p>
+    <div class="mermaid">
+flowchart LR
+    subgraph POS["🍔 売上データ（raw_pos）"]
+        T1["country<br/>国・都市情報"]
+        T2["franchise<br/>フランチャイズ<br/>オーナー"]
+        T3["location<br/>販売場所"]
+        T4["menu<br/>メニュー・価格"]
+        T5["truck<br/>トラック情報"]
+        T6["order_header<br/>注文ヘッダ"]
+        T7["order_detail<br/>注文明細"]
+    end
+    subgraph CUST["👤 顧客データ（raw_customer）"]
+        T8["customer_loyalty<br/>ロイヤルティ会員"]
+    end
+    subgraph SUP["💬 サポートデータ（raw_support）"]
+        T9["truck_reviews<br/>口コミレビュー"]
+    end
+    classDef tbl fill:#ede9fe,stroke:#a5b4fc,color:#3730a3
+    classDef sg fill:transparent,stroke:#cbd5e1,color:#64748b
+    class T1,T2,T3,T4,T5,T6,T7,T8,T9 tbl
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4 : ビューで繋ぐ — バラバラのデータを1つの視点に</h2>
+    <p class="sub">9つのテーブルをJOINで結合し、用途別に3つの層（harmonized → analytics → semantic）で整理します</p>
+    <div class="mermaid">
+flowchart LR
+    subgraph RAW["📋 生データ（9テーブル）"]
+        R["注文 + トラック +<br/>メニュー + 顧客 +<br/>場所 + レビュー ..."]
+    end
+    subgraph HAR["🔗 harmonized（統合層）"]
+        H1["orders_v<br/>全テーブルを結合した<br/>注文全体像"]
+        H2["customer_loyalty<br/>_metrics_v<br/>顧客ごとの購買指標"]
+        H3["truck_reviews_v<br/>レビュー+トラック<br/>+注文を結合"]
+    end
+    subgraph ANA["📊 analytics（分析層）"]
+        A1["orders_v<br/>日付列を追加"]
+        A2["customer_loyalty<br/>_metrics_v"]
+        A3["truck_reviews_v"]
+        A4["japan_menu_item<br/>_sales_feb_2022<br/>日本の売上（Streamlit用）"]
+    end
+    subgraph SEM["🤖 semantic_layer（AI分析層）"]
+        S1["orders_v<br/>Cortex Analyst用に<br/>型を整理"]
+        S2["customer_loyalty<br/>_metrics_v"]
+    end
+    R --> H1
+    R --> H2
+    R --> H3
+    H1 --> A1
+    H2 --> A2
+    H3 --> A3
+    H1 --> A4
+    H1 --> S1
+    H2 --> S2
+    classDef raw fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef har fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef ana fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    classDef sem fill:#f3e8ff,stroke:#c4b5fd,color:#6b21a8
+    class R raw
+    class H1,H2,H3 har
+    class A1,A2,A3,A4 ana
+    class S1,S2 sem
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 5 : データを投入 — S3から一括ロード</h2>
+    <p class="sub">Amazon S3上のCSVファイルからCOPY INTOコマンドで9テーブルに一括でデータを読み込みます</p>
+    <div class="mermaid">
+flowchart LR
+    S3["☁️ <b>Amazon S3</b><br/>CSVファイルが<br/>格納されている"]
+    STG["📂 <b>外部ステージ</b><br/>SnowflakeからS3に<br/>アクセスする窓口"]
+    S3 --> STG
+    STG --> L1["country"]
+    STG --> L2["franchise"]
+    STG --> L3["location"]
+    STG --> L4["menu"]
+    STG --> L5["truck"]
+    STG --> L6["order_header"]
+    STG --> L7["order_detail"]
+    STG --> L8["customer_loyalty"]
+    STG --> L9["truck_reviews"]
+    classDef s3 fill:#fef3c7,stroke:#fcd34d,color:#92400e
+    classDef stg fill:#e0f2fe,stroke:#7dd3fc,color:#1e3a5f
+    classDef tbl fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    class S3 s3
+    class STG stg
+    class L1,L2,L3,L4,L5,L6,L7,L8,L9 tbl
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Step 6 : 仕上げ — データ加工とAI検索の準備</h2>
+    <p class="sub">トラックデータの整形、Cortex AI検索サービスの構築、クロスリージョン設定を行い環境構築を完了します</p>
+    <div class="mermaid">
+flowchart LR
+    A["🔧 <b>トラックデータの加工</b><br/>year, make, model を<br/>JSON列にまとめる"]
+    B["🧹 <b>データクレンジング</b><br/>Ford_ → Ford に修正し<br/>truck_details を作成"]
+    C["🔍 <b>Cortex検索サービス</b><br/>レビューを自然言語で<br/>検索できるようにする"]
+    D["🌐 <b>クロスリージョン設定</b><br/>Cortex AIをどの<br/>リージョンでも利用可能に"]
+    E["✅ <b>セットアップ完了！</b><br/>ハンズオンを始める<br/>準備が整いました"]
+    A --> B --> C --> D --> E
+    classDef work fill:#ede9fe,stroke:#a5b4fc,color:#3730a3
+    classDef done fill:#d1fae5,stroke:#6ee7b7,color:#065f46
+    class A,B,C,D work
+    class E done
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({startOnLoad:true,theme:'base',flowchart:{curve:'basis',padding:20,nodeSpacing:30,rankSpacing:50},
+      themeVariables:{darkMode:false,background:'#ffffff',primaryColor:'#e0f2fe',primaryTextColor:'#334155',primaryBorderColor:'#7dd3fc',lineColor:'#94a3b8',secondaryColor:'#f1f5f9',tertiaryColor:'#f8fafc',fontSize:'14px',fontFamily:'"Segoe UI","Hiragino Sans","Meiryo",sans-serif'}});
+  </script>
+</body>
+</html>
